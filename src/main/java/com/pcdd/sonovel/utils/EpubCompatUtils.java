@@ -91,15 +91,18 @@ public class EpubCompatUtils {
      * 将 epub4j 风格的 OPF 转为无元素前缀写法，兼容严格阅读器。
      */
     public String rewriteOpf(String opfXml) {
-        if (StrUtil.isBlank(opfXml) || !opfXml.contains("<opf:")) {
+        if (StrUtil.isBlank(opfXml)) {
             return opfXml;
         }
-        return opfXml
-                .replace("<opf:", "<")
-                .replace("</opf:", "</")
-                .replace("xmlns:opf", "xmlns")
-                .replace("<metadata>", "<metadata xmlns:opf=\"" + OPF_NS + "\">")
-                // 历史版本曾把 guide type 写成中文「封面」，部分阅读器只认 cover
+        String result = opfXml;
+        if (result.contains("<opf:")) {
+            result = result
+                    .replace("<opf:", "<")
+                    .replace("</opf:", "</")
+                    .replace("xmlns:opf", "xmlns")
+                    .replace("<metadata>", "<metadata xmlns:opf=\"" + OPF_NS + "\">");
+        }
+        return result
                 .replace("type=\"封面\"", "type=\"cover\"")
                 .replace("type='封面'", "type=\"cover\"");
     }
