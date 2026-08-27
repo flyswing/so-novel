@@ -1,0 +1,20 @@
+{
+  "name": "So Novel",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "install": "cp -n bundle/config.ini config-dev.ini || true; mvn -q -DskipTests compile",
+  "terminals": [
+    {
+      "name": "web",
+      "command": "mvn -q -DskipTests exec:java -Dmode=web"
+    }
+  ],
+  "ports": [
+    {
+      "name": "webui",
+      "port": 7765
+    }
+  ]
+}
