@@ -101,6 +101,8 @@ public class AppConfigLoader {
             cfg.setWebEnabled(setting.getInt("enabled", SELECTION_WEB, 0));
         }
         cfg.setWebPort(setting.getInt("port", SELECTION_WEB, 7765));
+        cfg.setWebUsername(getStrOrDefault(setting, "username", SELECTION_WEB, "admin"));
+        cfg.setWebPassword(setting.getStr("password", SELECTION_WEB, ""));
 
         // [cookie]
         cfg.setQidianCookie(setting.getStr("qidian", SELECTION_COOKIE, ""));

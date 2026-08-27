@@ -65,6 +65,10 @@
               :class="settingsVisible ? 'translate-x-[18px]' : 'translate-x-[3px]'"></span>
       </span>
     </button>
+    <a x-show="authEnabled" href="/logout"
+       class="absolute left-0 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-primary transition-colors no-underline">
+      退出登录
+    </a>
   </header>
 
   <!-- 设置面板 -->
@@ -540,6 +544,7 @@
       settingsVisible: false,
       showSearchHistory: false,
       showSources: false,
+      authEnabled: false,
       sources: [],
       sourcesChecking: false,
       inputClass: 'w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10',
@@ -668,7 +673,10 @@
       async fetchConfig() {
         try {
           const data = await Api.getConfig()
-          if (data && data.data) Object.assign(this.serverConfig, data.data)
+          if (data && data.data) {
+            Object.assign(this.serverConfig, data.data)
+            this.authEnabled = !!data.data.authEnabled
+          }
         } catch (_) {
         }
       },

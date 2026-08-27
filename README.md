@@ -177,6 +177,18 @@ docker build -t sonovel .
 | -Dmode        | 启动模式，可选值：tui\|cli\|web | tui          |
 | -Dconfig.file | 配置文件路径                 | ./config.ini |
 
+Web 登录（可选）在 `config.ini` 的 `[web]` 中配置：
+
+```ini
+[web]
+enabled = 1
+port = 7765
+username = admin
+password = your-password   # 留空则不启用登录
+```
+
+启用后访问 `/login.html` 登录；首页提供「退出登录」。
+
 用法
 
 > [!NOTE]
