@@ -1,14 +1,11 @@
 {
   "name": "So Novel",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  "install": "cp -n bundle/config.ini config-dev.ini || true; mvn -q -DskipTests compile",
+  "install": "bash .cursor/install.sh",
   "terminals": [
     {
       "name": "web",
-      "command": "mvn -q -DskipTests exec:java -Dmode=web"
+      "command": "mvn -q -DskipTests exec:java -Dmode=web",
+      "description": "So Novel WebUI (Jetty) served at http://localhost:7765/"
     }
   ],
   "ports": [
