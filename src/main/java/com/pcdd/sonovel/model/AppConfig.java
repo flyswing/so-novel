@@ -42,6 +42,8 @@ public class AppConfig {
     // [web]
     private Integer webEnabled;
     private Integer webPort;
+    private String webUsername;
+    private String webPassword;
 
     // [cookie]
     private String qidianCookie;
