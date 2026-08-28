@@ -15,6 +15,7 @@ import com.pcdd.sonovel.model.Rule.Book;
 import com.pcdd.sonovel.parser.BookParser;
 import com.pcdd.sonovel.parser.ChapterParser;
 import com.pcdd.sonovel.parser.TocParser;
+import com.pcdd.sonovel.utils.DownloadOutputUtils;
 import com.pcdd.sonovel.utils.FileUtils;
 import com.pcdd.sonovel.utils.LogUtils;
 import com.pcdd.sonovel.utils.VirtualThreadLimiter;
@@ -42,9 +43,14 @@ public class Crawler {
     private final AppConfig config;
     private int digitCount;
     private String bookDir;
+    private String lastOutputFilename;
 
     public Crawler(AppConfig config) {
         this.config = config;
+    }
+
+    public String getLastOutputFilename() {
+        return lastOutputFilename;
     }
 
     public double crawl(String bookUrl) {
@@ -149,6 +155,10 @@ public class Crawler {
 
         new CrawlerPostHandler(config).handle(dir);
         stopWatch.stop();
+
+        if (book != null && stopWatch.getTotalTimeSeconds() > 0) {
+            lastOutputFilename = DownloadOutputUtils.resolveOutputFileName(book, config.getExtName(), bookDir);
+        }
         BookContext.clear();
 
         double totalTimeSeconds = stopWatch.getTotalTimeSeconds();

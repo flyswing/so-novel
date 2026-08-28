@@ -111,6 +111,13 @@
                :class="inputClass" placeholder="默认"
                type="number" x-model.number="settings.concurrency">
       </div>
+      <div class="flex flex-col gap-1.5 min-w-0 sm:col-span-2">
+        <label class="text-sm font-medium text-gray-600">默认下载方式</label>
+        <select @change="handleSettingChange" :class="inputClass" x-model="settings.downloadDestination">
+          <option value="server">仅保存到服务器</option>
+          <option value="server-and-client">保存到服务器并下载到本机</option>
+        </select>
+      </div>
     </div>
   </section>
 
@@ -359,9 +366,22 @@
      x-transition:enter="transition ease-out duration-150" x-transition:enter-end="opacity-100 scale-100"
      x-transition:enter-start="opacity-0 scale-95"
      x-transition:leave="transition ease-in duration-100" x-transition:leave-end="opacity-0 scale-95"
-     class="fixed z-[100] w-36 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5"
+     class="fixed z-[100] w-52 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5"
      x-cloak x-show="dropdownItem"
      x-transition:leave-start="opacity-100 scale-100">
+  <div class="px-3 py-2 border-b border-gray-100">
+    <p class="text-xs font-medium text-gray-500 mb-2">下载到</p>
+    <label class="flex items-center gap-2 text-sm py-1 cursor-pointer text-gray-700">
+      <input @change="handleSettingChange" class="text-primary" name="downloadDestination" type="radio"
+             value="server" x-model="settings.downloadDestination">
+      <span>仅服务器</span>
+    </label>
+    <label class="flex items-center gap-2 text-sm py-1 cursor-pointer text-gray-700">
+      <input @change="handleSettingChange" class="text-primary" name="downloadDestination" type="radio"
+             value="server-and-client" x-model="settings.downloadDestination">
+      <span>服务器 + 本机</span>
+    </label>
+  </div>
   <button @click="handleDownloadToServer(dropdownItem, '')"
           class="w-full text-left px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50"
           x-text="defaultExtLabel + ' (默认)'"></button>
@@ -540,7 +560,7 @@
       suggestions: [],
       showSuggestions: false,
       serverConfig: { searchLimit: -1, concurrency: -1, version: '', extName: 'epub' },
-      settings: { format: '', language: '', searchLimit: '', concurrency: '', showSuggestionsEnabled: true },
+      settings: { format: '', language: '', searchLimit: '', concurrency: '', showSuggestionsEnabled: true, downloadDestination: 'server-and-client' },
       settingsVisible: false,
       showSearchHistory: false,
       showSources: false,
@@ -738,18 +758,27 @@
         if (finalFormat) params.set('format', finalFormat)
         if (this.settings.language) params.set('language', this.settings.language)
         if (this.settings.concurrency) params.set('concurrency', this.settings.concurrency)
+        const downloadToClient = this.settings.downloadDestination === 'server-and-client'
+        let serverOnlySuccess = false
         try {
-          const resp = await Api.downloadBook(params)
-          if (!resp.ok) {
-            const data = await resp.json()
-            throw new Error(data.message || '未知错误')
-          }
+          const body = await Api.downloadBook(params)
+          const filename = body.data?.filename
           await this.fetchLocalBooks()
-          location.href = `/book-download?filename=${encodeURIComponent(this.latestFileName)}`
+          if (downloadToClient && filename) {
+            location.href = `/book-download?filename=${encodeURIComponent(filename)}`
+          } else if (filename) {
+            serverOnlySuccess = true
+            this.downloadCurrent = 0
+            this.downloadTotal = 0
+            this.tipText = `已保存到服务器：${filename}`
+            setTimeout(() => this.hideTip(), 2500)
+          }
         } catch (error) {
           alert(`下载书籍到服务器失败: ${error.message}`)
         } finally {
-          this.hideTip()
+          if (!serverOnlySuccess) {
+            this.hideTip()
+          }
         }
       },
 
@@ -867,6 +896,7 @@
           this.settings.searchLimit = saved.searchLimit || ''
           this.settings.concurrency = saved.concurrency || ''
           this.settings.showSuggestionsEnabled = saved.showSuggestionsEnabled !== false
+          this.settings.downloadDestination = saved.downloadDestination || 'server-and-client'
         } catch (_) {
         }
       },
@@ -892,8 +922,8 @@
           return
         }
         const rect = event.currentTarget.getBoundingClientRect()
-        const menuWidth = 144
-        const menuHeight = 200
+        const menuWidth = 208
+        const menuHeight = 280
         let top = rect.bottom + 6
         if (top + menuHeight > window.innerHeight - 8) top = rect.top - menuHeight - 6
         let left = rect.right - menuWidth

@@ -32,6 +32,13 @@ const Api = {
   downloadBook(params) {
     return fetch(`/book-fetch?${params.toString()}`, { credentials: 'same-origin' })
       .then(r => this._handle(r))
+      .then(async r => {
+        const body = await r.json()
+        if (!r.ok || body.code !== 200) {
+          throw new Error(body.message || '下载失败')
+        }
+        return body
+      })
   },
 
   deleteBook(filename) {

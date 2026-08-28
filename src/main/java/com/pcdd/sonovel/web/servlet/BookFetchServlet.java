@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class BookFetchServlet extends HttpServlet {
@@ -55,17 +57,27 @@ public class BookFetchServlet extends HttpServlet {
                     .url(bookUrl)
                     .build();
 
-            double totalTimeSeconds = downloadFileToServer(sr, format, language, concurrency);
+            Crawler crawler = downloadFileToServer(sr, format, language, concurrency);
+            double totalTimeSeconds = crawler.crawl(sr.getUrl());
             if (totalTimeSeconds == 0) {
                 RespUtils.writeError(resp, 500, "源站章节目录为空，中止下载");
+                return;
             }
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("elapsedSeconds", totalTimeSeconds);
+            String filename = crawler.getLastOutputFilename();
+            if (filename != null) {
+                data.put("filename", filename);
+            }
+            RespUtils.writeJson(resp, data);
 
         } catch (Exception e) {
             RespUtils.writeError(resp, 500, e.getMessage());
         }
     }
 
-    private double downloadFileToServer(SearchResult sr, String format, String language, Integer concurrency) {
+    private Crawler downloadFileToServer(SearchResult sr, String format, String language, Integer concurrency) {
         AppConfig cfg = BeanUtil.copyProperties(AppConfigLoader.APP_CONFIG, AppConfig.class);
         cfg.setSourceId(sr.getSourceId());
 
@@ -80,8 +92,7 @@ public class BookFetchServlet extends HttpServlet {
         }
 
         Console.log("<== 正在解析章节目录...");
-
-        return new Crawler(cfg).crawl(sr.getUrl());
+        return new Crawler(cfg);
     }
 
 }
