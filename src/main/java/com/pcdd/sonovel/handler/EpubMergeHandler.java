@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.pcdd.sonovel.model.Rule.Book;
+import com.pcdd.sonovel.utils.EpubCompatUtils;
 import com.pcdd.sonovel.utils.FileUtils;
 import io.documentnode.epub4j.domain.*;
 import io.documentnode.epub4j.epub.EpubWriter;
@@ -67,10 +68,18 @@ public class EpubMergeHandler implements PostProcessingHandler {
             book.addSection(title, new Resource(id, FileUtil.readBytes(file), id + ".html", MediaTypes.XHTML));
         }
 
-        // 设置 guide，用于指定封面
-        book.getGuide().addReference(new GuideReference(new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME), "封面", COVER_NAME));
+        // 设置 guide，用于指定封面（type 必须为 cover，中文值会导致部分阅读器无法识别）
+        book.getGuide().addReference(new GuideReference(
+                new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME),
+                GuideReference.COVER,
+                "封面"));
+        File epubFile = new File(StrUtil.format("{}/{}({}).epub", saveDir.getParent(), b.getBookName(), b.getAuthor()));
         EpubWriter epubWriter = new EpubWriter();
-        epubWriter.write(book, new FileOutputStream(StrUtil.format("{}/{}({}).epub", saveDir.getParent(), b.getBookName(), b.getAuthor())));
+        try (FileOutputStream out = new FileOutputStream(epubFile)) {
+            epubWriter.write(book, out);
+        }
+        // 去掉 content.opf 的 opf: 元素前缀，兼容 BookOrbit / WPS / 掌阅等阅读器
+        EpubCompatUtils.fixForStrictReaders(epubFile);
     }
 
 }
