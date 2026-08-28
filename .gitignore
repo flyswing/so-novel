@@ -13,6 +13,7 @@ buildNumber.properties
 .idea/
 downloads/
 dist/
+.docker-build/
 logs/
 bundle/jre*.zip
 
