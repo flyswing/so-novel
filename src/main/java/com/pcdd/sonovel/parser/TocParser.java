@@ -179,7 +179,7 @@ public class TocParser extends Source {
     private void addChapter(Element el, List<Chapter> toc, int order, Rule.Toc r) {
         toc.add(Chapter.builder()
                 .title(el.text())
-                .url(HtmlExtractor.extractContent(el, r.getNextPage(), ATTR_HREF))
+                .url(HtmlExtractor.extractContent(el, null, ATTR_HREF))
                 .order(order)
                 .build());
     }

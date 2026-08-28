@@ -66,6 +66,9 @@ public class FileUtils {
      * 替换文件名非法字符，仅用于文件名而非路径
      */
     public String sanitizeFileName(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
         String osName = System.getProperty("os.name").toLowerCase();
 
         if (osName.contains("win")) {

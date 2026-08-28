@@ -87,8 +87,14 @@ public class ChapterFilter extends Source {
          * 构建最终过滤内容
          */
         public Chapter build() {
+            if (this.content == null) {
+                this.content = "";
+            }
             if (applyInvisibleCharsFilter) {
                 this.content = CrawlUtils.cleanInvisibleChars(this.content);
+                if (this.content == null) {
+                    this.content = "";
+                }
             }
 
             if (applyEscapeFilter) {
@@ -97,7 +103,8 @@ public class ChapterFilter extends Source {
             }
 
             if (applyAdsFilter) {
-                String filteredContent = this.content.replaceAll(rule.getChapter().getFilterTxt(), "");
+                String filterTxt = StrUtil.nullToEmpty(rule.getChapter().getFilterTxt());
+                String filteredContent = this.content.replaceAll(filterTxt, "");
                 // filterTag 格式需修改为 div.tt-title, #title, [style]
                 this.content = HtmlUtils.removeTags(filteredContent, rule.getChapter().getFilterTag());
             }

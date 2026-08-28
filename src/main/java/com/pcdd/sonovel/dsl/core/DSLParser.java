@@ -15,6 +15,9 @@ public class DSLParser {
 
     public Result parse(String input) {
         Result result = new Result();
+        if (input == null) {
+            return result;
+        }
 
         int i = 0;
         int first = input.indexOf("@");

@@ -268,7 +268,10 @@ public class SearchParser extends Source {
 
     // 若 url 含 @js:，则 JS 接收 keyword 返回完整 URL；否则直接格式化
     private static String processUrl(String url, String keyword) {
-        if (url != null && url.contains("@js:")) {
+        if (StrUtil.isBlank(url)) {
+            throw new IllegalStateException("书源 search.url 未配置");
+        }
+        if (url.contains("@js:")) {
             return JsCaller.call(StrUtil.subAfter(url, "@js:", false), keyword);
         }
         return url.formatted(keyword);

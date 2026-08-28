@@ -26,6 +26,9 @@ public class HtmlExtractor {
      * @param dsl 格式：xxx@js:code;@java:code
      */
     public String executeDsl(String dsl, String input) {
+        if (StrUtil.isBlank(dsl)) {
+            return input;
+        }
         return DSL_ENGINE.run(dsl, input);
     }
 
@@ -35,8 +38,14 @@ public class HtmlExtractor {
      * 等价于 document.select(query) | document.selectXpath(query)
      */
     public Elements select(Element el, String query) {
+        if (el == null || StrUtil.isBlank(query)) {
+            return new Elements();
+        }
         // 分割查询条件以提取 XPath 或 CSS 查询
         String selector = StrUtil.subBefore(query, "@", false);
+        if (StrUtil.isBlank(selector)) {
+            return new Elements();
+        }
 
         boolean isXPath = selector.matches("^(/|//|\\().*");
         return isXPath ? el.selectXpath(selector) : el.select(selector);

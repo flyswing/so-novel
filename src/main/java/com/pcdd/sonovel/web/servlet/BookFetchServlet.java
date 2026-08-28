@@ -24,6 +24,10 @@ public class BookFetchServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String bookUrl = req.getParameter("url");
+            if (StrUtil.isBlank(bookUrl)) {
+                RespUtils.writeError(resp, 400, "参数 url 不可为空");
+                return;
+            }
             String format = req.getParameter("format");
             String language = req.getParameter("language");
             String concurrencyStr = req.getParameter("concurrency");
@@ -61,6 +65,7 @@ public class BookFetchServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
+            Console.error(e);
             RespUtils.writeError(resp, 500, e.getMessage());
         }
     }

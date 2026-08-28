@@ -193,8 +193,8 @@ public class CoverUpdater {
      * 判断书名 + 作者是否匹配（忽略繁简体、HTML 标签）
      */
     private boolean matchBook(Book book, String name, String author) {
-        String sourceName = HanLP.convertToSimplifiedChinese(book.getBookName());
-        String sourceAuthor = HanLP.convertToSimplifiedChinese(book.getAuthor());
+        String sourceName = HanLP.convertToSimplifiedChinese(StrUtil.nullToEmpty(book.getBookName()));
+        String sourceAuthor = HanLP.convertToSimplifiedChinese(StrUtil.nullToEmpty(book.getAuthor()));
         name = HtmlUtil.cleanHtmlTag(name);
         author = HtmlUtil.cleanHtmlTag(author);
         return StrUtil.equals(sourceName, name) && StrUtil.equals(sourceAuthor, author);
