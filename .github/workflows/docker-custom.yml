@@ -39,7 +39,6 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/sonovel
-          docker build -f Dockerfile -t "$IMAGE:custom" -t "$IMAGE:latest" .docker-build
+          docker build -f Dockerfile -t "$IMAGE:custom" .docker-build
           docker push "$IMAGE:custom"
-          docker push "$IMAGE:latest"
           echo "Published $IMAGE:custom"
