@@ -1,0 +1,13 @@
+services:
+  sonovel:
+    image: flyswing/sonovel:custom
+    container_name: sonovel
+    ports:
+      - "7765:7765"
+    environment:
+      JAVA_OPTS: "-Dmode=web"
+    volumes:
+      - ./docker/data/config.ini:/sonovel/config.ini
+      - ./docker/data/downloads:/sonovel/downloads
+      - ./docker/data/rules:/sonovel/rules
+    restart: unless-stopped

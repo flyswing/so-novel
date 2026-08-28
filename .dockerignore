@@ -1,0 +1,7 @@
+.docker-build
+target
+.git
+.idea
+*.md
+downloads
+docker/data
