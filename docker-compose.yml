@@ -1,8 +1,7 @@
 services:
   sonovel:
-    # 本地构建: flyswing/sonovel:custom
-    # GHCR 镜像: ghcr.io/flyswing/sonovel:custom
-    image: ${SONOVEL_IMAGE:-ghcr.io/flyswing/sonovel:custom}
+    # GHCR: ghcr.io/flyswing/so-novel:custom
+    image: ${SONOVEL_IMAGE:-ghcr.io/flyswing/so-novel:custom}
     container_name: sonovel
     ports:
       - "7765:7765"

@@ -4,7 +4,7 @@ set -euo pipefail
 
 PROJECT_PATH="$(cd "$(dirname "$0")/.." && pwd)"
 IMAGE_NAME="${IMAGE_NAME:-flyswing/sonovel:custom}"
-GHCR_IMAGE="${GHCR_IMAGE:-ghcr.io/flyswing/sonovel:custom}"
+GHCR_IMAGE="${GHCR_IMAGE:-ghcr.io/flyswing/so-novel:custom}"
 ARCH="${ARCH:-$(uname -m)}"
 
 cd "$PROJECT_PATH"
@@ -51,5 +51,5 @@ if [ ! -f docker/data/rules/main.json ]; then
 fi
 echo ""
 echo "启动: docker compose up -d"
-echo "镜像: ghcr.io/flyswing/sonovel:custom"
+echo "镜像: ghcr.io/flyswing/so-novel:custom"
 echo "登录: http://localhost:7765/login.html  (admin / admin)"
