@@ -1,0 +1,17 @@
+{
+  "name": "So Novel",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "web",
+      "command": "mvn -q -DskipTests exec:java -Dmode=web",
+      "description": "So Novel WebUI (Jetty) served at http://localhost:7765/"
+    }
+  ],
+  "ports": [
+    {
+      "name": "webui",
+      "port": 7765
+    }
+  ]
+}
