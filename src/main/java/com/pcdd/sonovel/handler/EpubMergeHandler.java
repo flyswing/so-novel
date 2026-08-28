@@ -26,6 +26,8 @@ import static org.fusesource.jansi.AnsiRenderer.render;
 public class EpubMergeHandler implements PostProcessingHandler {
 
     public static final String COVER_NAME = "cover.html";
+    public static final String COVER_ID = "cover";
+    public static final String COVER_IMAGE_ID = "cover-image";
 
     @SneakyThrows
     @Override
@@ -41,12 +43,13 @@ public class EpubMergeHandler implements PostProcessingHandler {
         meta.addTitle(b.getBookName());
         meta.setAuthors(List.of(new Author(b.getAuthor())));
         meta.addDescription(b.getIntro());
+        Resource coverPage = new Resource(COVER_ID, ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME, MediaTypes.XHTML);
         // 下载封面失败会导致生成 epub 中断
         try {
             byte[] bytes = HttpUtil.downloadBytes(b.getCoverUrl());
-            book.setCoverImage(new Resource(bytes, "cover.jpg"));
-            // 添加封面页
-            book.addSection("封面", new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME));
+            book.setCoverImage(new Resource(COVER_IMAGE_ID, bytes, "cover.jpg", MediaTypes.JPG));
+            // 添加封面页（必须设置 id，否则 spine 的 idref 为 null 会导致生成失败）
+            book.addSection("封面", coverPage);
         } catch (Exception e) {
             Console.error(render("EPUB 最新封面 {} 下载失败：{}", "red"), b.getCoverUrl(), e.getMessage());
         }
@@ -69,10 +72,7 @@ public class EpubMergeHandler implements PostProcessingHandler {
         }
 
         // 设置 guide，用于指定封面（type 必须为 cover，中文值会导致部分阅读器无法识别）
-        book.getGuide().addReference(new GuideReference(
-                new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME),
-                GuideReference.COVER,
-                "封面"));
+        book.getGuide().addReference(new GuideReference(coverPage, GuideReference.COVER, "封面"));
         File epubFile = new File(StrUtil.format("{}/{}({}).epub", saveDir.getParent(), b.getBookName(), b.getAuthor()));
         EpubWriter epubWriter = new EpubWriter();
         try (FileOutputStream out = new FileOutputStream(epubFile)) {
