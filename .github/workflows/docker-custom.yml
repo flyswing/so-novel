@@ -1,0 +1,45 @@
+name: Docker Custom
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - flyswing/custom
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build app.jar
+        run: mvn -q clean package -Dmaven.test.skip=true
+
+      - name: Prepare Docker build context
+        run: |
+          mkdir -p .docker-build/rules
+          cp target/app-jar-with-dependencies.jar .docker-build/app.jar
+          cp docker/config.ini .docker-build/config.ini
+          cp -r bundle/rules/. .docker-build/rules/
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository_owner }}/sonovel
+          docker build -f Dockerfile -t "$IMAGE:custom" -t "$IMAGE:latest" .docker-build
+          docker push "$IMAGE:custom"
+          docker push "$IMAGE:latest"
+          echo "Published $IMAGE:custom"

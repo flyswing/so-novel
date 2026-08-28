@@ -4,6 +4,7 @@ set -euo pipefail
 
 PROJECT_PATH="$(cd "$(dirname "$0")/.." && pwd)"
 IMAGE_NAME="${IMAGE_NAME:-flyswing/sonovel:custom}"
+GHCR_IMAGE="${GHCR_IMAGE:-ghcr.io/flyswing/sonovel:custom}"
 ARCH="${ARCH:-$(uname -m)}"
 
 cd "$PROJECT_PATH"
@@ -27,6 +28,18 @@ fi
 
 rm -rf .docker-build
 echo "✅ 完成: ${IMAGE_NAME}"
+if [ "${PUSH_GHCR:-0}" = "1" ]; then
+  echo "📤 推送到 GHCR: ${GHCR_IMAGE}"
+  if docker info >/dev/null 2>&1; then
+    DOCKER_CMD=docker
+  else
+    DOCKER_CMD="sudo docker"
+  fi
+  echo "$(gh auth token)" | $DOCKER_CMD login ghcr.io -u "$(gh api user -q .login)" --password-stdin
+  $DOCKER_CMD tag "${IMAGE_NAME}" "${GHCR_IMAGE}"
+  $DOCKER_CMD push "${GHCR_IMAGE}"
+  echo "✅ 已推送: ${GHCR_IMAGE}"
+fi
 echo ""
 echo "📁 初始化数据目录..."
 mkdir -p docker/data/downloads docker/data/rules

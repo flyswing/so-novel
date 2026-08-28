@@ -1,6 +1,6 @@
 services:
   sonovel:
-    image: flyswing/sonovel:custom
+    image: ghcr.io/flyswing/sonovel:custom
     container_name: sonovel
     ports:
       - "7765:7765"
