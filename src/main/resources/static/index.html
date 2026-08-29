@@ -111,6 +111,14 @@
                :class="inputClass" placeholder="默认"
                type="number" x-model.number="settings.concurrency">
       </div>
+      <div class="flex flex-col gap-1.5 min-w-0 sm:col-span-2">
+        <label class="text-sm font-medium text-gray-600">下载到本机</label>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input @change="handleSettingChange" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary/20"
+                 type="checkbox" x-model="settings.downloadToLocal">
+          <span class="text-sm text-gray-600">下载完成后自动保存到浏览器（关闭则仅保存在服务器，可在「已下书籍」中手动下载）</span>
+        </label>
+      </div>
     </div>
   </section>
 
@@ -540,7 +548,7 @@
       suggestions: [],
       showSuggestions: false,
       serverConfig: { searchLimit: -1, concurrency: -1, version: '', extName: 'epub' },
-      settings: { format: '', language: '', searchLimit: '', concurrency: '', showSuggestionsEnabled: true },
+      settings: { format: '', language: '', searchLimit: '', concurrency: '', showSuggestionsEnabled: true, downloadToLocal: false },
       settingsVisible: false,
       showSearchHistory: false,
       showSources: false,
@@ -738,6 +746,7 @@
         if (finalFormat) params.set('format', finalFormat)
         if (this.settings.language) params.set('language', this.settings.language)
         if (this.settings.concurrency) params.set('concurrency', this.settings.concurrency)
+        let serverOnlySuccess = false
         try {
           const resp = await Api.downloadBook(params)
           if (!resp.ok) {
@@ -745,11 +754,21 @@
             throw new Error(data.message || '未知错误')
           }
           await this.fetchLocalBooks()
-          location.href = `/book-download?filename=${encodeURIComponent(this.latestFileName)}`
+          if (this.settings.downloadToLocal && this.latestFileName) {
+            location.href = `/book-download?filename=${encodeURIComponent(this.latestFileName)}`
+          } else if (this.latestFileName) {
+            serverOnlySuccess = true
+            this.downloadCurrent = 0
+            this.downloadTotal = 0
+            this.tipText = `已保存到服务器：${this.latestFileName}`
+            setTimeout(() => this.hideTip(), 2500)
+          }
         } catch (error) {
           alert(`下载书籍到服务器失败: ${error.message}`)
         } finally {
-          this.hideTip()
+          if (!serverOnlySuccess) {
+            this.hideTip()
+          }
         }
       },
 
@@ -867,6 +886,7 @@
           this.settings.searchLimit = saved.searchLimit || ''
           this.settings.concurrency = saved.concurrency || ''
           this.settings.showSuggestionsEnabled = saved.showSuggestionsEnabled !== false
+          this.settings.downloadToLocal = saved.downloadToLocal === true
         } catch (_) {
         }
       },
